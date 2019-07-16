@@ -129,7 +129,7 @@ You can use [python-inquirer's built-in theming options](https://magmax.org/pyth
 
 - Passing arguments and keyword arguments
 
-  - This works as you would expect, but ...
+  - You can of course pass whatever arguments you like to your functions. Just keep in mind, that potentially any and every function will be called, so all of your functions *must* accept the **same** arguments and keyword arguments. To prevent possible errors down the road, InquirerExecuter checks for this at creation time and will throw an `AssertionError` if the arguments and keyword arguments of your functions don't match.
 
 
 ## Raison D'être

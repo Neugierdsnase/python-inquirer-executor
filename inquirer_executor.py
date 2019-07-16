@@ -11,9 +11,12 @@ class InquirerExecutorBase:
         self.message = message
         self.carousel = carousel
         self.inquirerInstance = inquirerInstance
-        self._options = [self._allow_kwargs(f) for f in functions]
+        self._options = functions
         self._update_question()
+        self._options_argspecs = None
         self.answer = None
+        for function in self._options:
+            self._check_arg_consistency(function)
 
     def _update_question(self):
         kwargs = dict(message=self.message,  choices=[function.__doc__ for function in self._options])
@@ -23,21 +26,22 @@ class InquirerExecutorBase:
             self.inquirerInstance("omittet", **kwargs)
         ]
 
+    # In the interest of failing fast, the user should be made aware of this ASAP
+    def _check_arg_consistency(self, func):
+        argspec = getargspec(func).args
+        print(argspec, self._options_argspecs)
+        if self._options_argspecs:
+            if not self._options_argspecs == argspec:
+                raise AssertionError("""
+                All functions passed to an InquirerExecutor instance need to accept the same arguments and keywords.
+                See README under "Passing arguments and keyword arguments" for more information.
+                """)
+        else:
+            self._options_argspecs = argspec
+
     @classmethod
     def from_iterable(cls, message, functions, carousel=False):
         return cls(message, functions, carousel)
-
-    # This is a decorator to avoid TypeErrors for functions that do not expect certain kwargs.
-    @staticmethod
-    def _allow_kwargs(func):
-        argspec = getargspec(func)
-        @wraps(func)
-        def newfunc(*args, **kwargs):
-            if args:
-                raise TypeError("You can't use positional arguments with functions that are being used as options.")
-            some_args = dict((keyword, kwargs[keyword]) for keyword in argspec.args if keyword in kwargs)
-            return func(**some_args)
-        return newfunc
 
     def __iter__(self):
         yield from self._options
@@ -48,7 +52,7 @@ class InquirerExecutorBase:
         for item in options:
             if not callable(item):
                 raise TypeError("Only function types (or iterables of them) can be added to an InquirerExecutor instance.")
-        self._options.extend(self._allow_kwargs(options))
+        self._options.extend(options)
         self._update_question()
         return self
 
@@ -58,7 +62,7 @@ class InquirerExecutorBase:
     def __setitem__(self, index, value):
         if not callable(value):
             raise TypeError("Only function types (or methods) can be part of an InquirerExecutor instance.")
-        self._options[index] = self._allow_kwargs(value)
+        self._options[index] = value
         self._update_question()
     
     def prompt_user(self, **kwargs):
@@ -91,7 +95,8 @@ class InquirerExecutorList(InquirerExecutorBase):
         self.find_function()(*args, **kwargs)
 
     def prompt_and_execute(self, *args, **kwargs):
-        return self.prompt_user(**kwargs).find_function()(*args, **kwargs)
+        theme = kwargs.pop("theme", None)
+        return self.prompt_user(theme=theme).find_function()(*args, **kwargs)
 
 
 class InquirerExecutorCheckbox(InquirerExecutorBase):
@@ -110,7 +115,8 @@ class InquirerExecutorCheckbox(InquirerExecutorBase):
             function(*args, **kwargs)
 
     def prompt_and_execute(self, *args, **kwargs):
-        self.prompt_user(**kwargs).find_functions()
+        theme = kwargs.pop("theme", None)
+        self.prompt_user(theme=theme).find_functions()
         for function in self.execution_stack:
             function(*args, **kwargs)
         return self.execution_stack
