@@ -1,20 +1,20 @@
 # python-inquirer-executor
-This is a wrapper around [python-inquirer](https://github.com/magmax/python-inquirer).
+This is a wrapper around [python-inquirer](https://github.com/magmax/python-inquirer). From this project's README:
 
 > So, **Inquirer** should ease the process of asking end user **questions**, **parsing**, **validating** answers, managing **hierarchical prompts** and providing **error feedback**.
 
-This package extends the thought by using it's `List` and `Checkbox` classes to create prompts that will automatically call one or many function(s) corresponding to user's choice, while keeping you code nice, tidy and readable. This is achieved by facilitating the docstring of your functions as user-facing representaion of said functions (which is what docstrings are intended to be). 
+This package extends this thought by building classes on top of it to create prompts that will automatically call one or more functions corresponding to user's choice, while keeping you code nice, tidy and readable. This is achieved by facilitating the docstring of your functions as user-facing representaion of themselves (which is what docstrings (kinda) are intended to be anyways). 
 
 ## How to use
 ### Installation
-As of right now, the only way to use this is to download it from [the GitHub repository](.).
+As of right now, the only way to use this is to download it from this GitHub repository.
 ### As a single-choice list
 ```python
 from inquirer_executor import InquirerExecutorList 
 
 question = InquirerExecutorList("Question you want to ask the user?", list_of_functions)
 ```
-The list of functions can be any literal that is exlusively composed of function types. The class will generate the question fron the strin you privided as the first argument and give the user the option of choosing a functions. These options will be represented the function's corresponding **docstring**. 
+The list of functions can be any iterable that is exlusively composed of function types. The class will generate the question from the string you privided as the first argument and give the user the option of choosing a function. These options will be represented by the function's corresponding **docstring**. 
 
 #### Example
 
@@ -35,8 +35,8 @@ def print_three():
 
 question = InquirerExecutorList("Of the given choices, how many puppies is best?", [print_one, print_two, print_three])    
 ```
-This will create the instance of the question. You now have `prompt_user()` and `prompt_and_execute()` methods at your disposal. Once you have used the `prompt_user()` method, you can also:
-- use the `find_function()` method to return the corresponding function to the users answer
+This will create the instance of the question. You now have `prompt_user()` and `prompt_and_execute()` methods at your disposal. Once you have used the `prompt_user()` method, and the user has provided an answer, you can also:
+- use the `find_function()` method to return the corresponding function to the user's answer
 - access the instances `answer` value to read the user's answer (the docstring they have selected)
 - use the `execute()` method to execute the users choice at a later point (the function returns the return value of the function called)
 
@@ -53,7 +53,7 @@ Which gives us this output:
 
 three
 ```
-The user has chosen from the docstrings representing the functions and the function got executed. Neat.
+The user has chosen from the docstrings representing the functions and the function got executed, printing 'three'. Neat.
 
 ### As a multiple-choice checkbox
 ```python
@@ -82,7 +82,7 @@ def print_kittens():
 
 question2 = InquirerExecutorCheckbox("Of the given choices, which ones are furry and cuddly?", [print_puppies, print_rocks, print_kittens])
 ```
-This will create the instance of the question. Again, you now have `prompt_user()` and `prompt_and_execute()` methods at your disposal. Once you have used the `prompt_user()` method, you can:
+This will create the instance of the question. Again, you now have `prompt_user()` and `prompt_and_execute()` methods at your disposal. Once you have generated an answer with the `prompt_user()` method, you can:
 - use the `find_functions()` *(mind the plural 's')* method to return the corresponding list of functions to the users answer
 - access the instances `answer` value to read the user's answers (a list of the docstrings they have selected)
 - use the `execute()` method to execute the users choices at a later point (the function itself always returns `None`)
@@ -107,7 +107,7 @@ The user has checked options one and three and the corresponing functions got ca
 
 ### Theming
 
-You can use [python-inquirer's built-in theming options](https://magmax.org/python-inquirer/usage.html#themes) with the key difference that you have **instantiate** the theme **before using it**.
+You can use [python-inquirer's built-in theming options](https://magmax.org/python-inquirer/usage.html#themes) with the key difference that you have **instantiate** the theme **before using it**. You then pass the **instance** to the `prompt_user()` or `prompt_and_execute()` methods using the `theme` keyword, **not** the theme class.
 
 ### Additional notes on usage
 - Adding options later
