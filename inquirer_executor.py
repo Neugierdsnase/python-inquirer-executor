@@ -4,10 +4,13 @@ from functools import wraps
 from inspect import getargspec
 from inquirer import List, Checkbox, prompt
 
+
 class InquirerExecutorBase:
     def __init__(self, message, functions, carousel=False, inquirerInstance=None):
         if not inquirerInstance:
-            raise ValueError("You are not meant to use the base class directly, please use InquirerExecutorList or InquirerExecutorCheckbox instead.")
+            raise ValueError(
+                "You are not meant to use the base class directly, please use InquirerExecutorList or InquirerExecutorCheckbox instead."
+            )
         self.message = message
         self.carousel = carousel
         self.inquirerInstance = inquirerInstance
@@ -19,12 +22,13 @@ class InquirerExecutorBase:
             self._check_arg_consistency(function)
 
     def _update_question(self):
-        kwargs = dict(message=self.message,  choices=[function.__doc__ for function in self._options])
+        kwargs = dict(
+            message=self.message,
+            choices=[function.__doc__ for function in self._options],
+        )
         if self.carousel:
             kwargs.update(("carousel", self.carousel))
-        self._question = [
-            self.inquirerInstance("omittet", **kwargs)
-        ]
+        self._question = [self.inquirerInstance("omittet", **kwargs)]
 
     # In the interest of failing fast, the user should be made aware of this ASAP
     def _check_arg_consistency(self, func):
@@ -32,10 +36,12 @@ class InquirerExecutorBase:
         print(argspec, self._options_argspecs)
         if self._options_argspecs:
             if not self._options_argspecs == argspec:
-                raise AssertionError("""
+                raise AssertionError(
+                    """
                 All functions passed to an InquirerExecutor instance need to accept the same arguments and keywords.
                 See README under "Passing arguments and keyword arguments" for more information.
-                """)
+                """
+                )
         else:
             self._options_argspecs = argspec
 
@@ -48,10 +54,12 @@ class InquirerExecutorBase:
 
     def __add__(self, options):
         # If an iterable has already been provided, use it, if not, create one with single item
-        options = options if hasattr(options, '__iter__') else [options]
+        options = options if hasattr(options, "__iter__") else [options]
         for item in options:
             if not callable(item):
-                raise TypeError("Only function types (or iterables of them) can be added to an InquirerExecutor instance.")
+                raise TypeError(
+                    "Only function types (or iterables of them) can be added to an InquirerExecutor instance."
+                )
         self._options.extend(options)
         self._update_question()
         return self
@@ -61,10 +69,12 @@ class InquirerExecutorBase:
 
     def __setitem__(self, index, value):
         if not callable(value):
-            raise TypeError("Only function types (or methods) can be part of an InquirerExecutor instance.")
+            raise TypeError(
+                "Only function types (or methods) can be part of an InquirerExecutor instance."
+            )
         self._options[index] = value
         self._update_question()
-    
+
     def prompt_user(self, **kwargs):
         self.answer = prompt(self._question, **kwargs)["omittet"]
         return self
@@ -88,7 +98,7 @@ class InquirerExecutorList(InquirerExecutorBase):
         for function in self._options:
             if function.__doc__ == self.answer:
                 return function
-    
+
     def execute(self, *args, **kwargs):
         if not self.answer:
             raise ValueError("Execution not possible since no answer was provided.")
@@ -101,11 +111,15 @@ class InquirerExecutorList(InquirerExecutorBase):
 
 class InquirerExecutorCheckbox(InquirerExecutorBase):
     def __init__(self, message, functions, carousel=False):
-        super().__init__(message, functions, carousel=carousel, inquirerInstance=Checkbox)
+        super().__init__(
+            message, functions, carousel=carousel, inquirerInstance=Checkbox
+        )
         self.execution_stack = []
 
     def find_functions(self):
-        self.execution_stack = [function for function in self._options if function.__doc__ in self.answer]
+        self.execution_stack = [
+            function for function in self._options if function.__doc__ in self.answer
+        ]
         return self.execution_stack
 
     def execute(self, *args, **kwargs):
@@ -121,13 +135,17 @@ class InquirerExecutorCheckbox(InquirerExecutorBase):
             function(*args, **kwargs)
         return self.execution_stack
 
+
 class QuestionsCatalogue(list):
     """
     This class holds multiple instances of the InquirerExecutor class
     or any inquirer classes to be able to prompt for more than one 
     question before starting to execute the users choices.
     """
+
     def __init__(self):
         super().__init__()
         self.execution_stack = []
-    pass 
+
+    pass
+
