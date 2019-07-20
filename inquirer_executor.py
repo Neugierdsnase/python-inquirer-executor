@@ -27,7 +27,7 @@ class InquirerExecutorBase:
             choices=[function.__doc__ for function in self._options],
         )
         if self.carousel:
-            kwargs.update(("carousel", self.carousel))
+            kwargs.update(carousel=self.carousel)
         self._question = [self._inquirerInstance("omittet", **kwargs)]
 
     # In the interest of failing fast, checking for consistent args and kwargs at creation time
