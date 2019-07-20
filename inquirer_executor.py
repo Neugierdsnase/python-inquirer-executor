@@ -13,7 +13,7 @@ class InquirerExecutorBase:
             )
         self.message = message
         self.carousel = carousel
-        self.inquirerInstance = inquirerInstance
+        self._inquirerInstance = inquirerInstance
         self._options = functions
         self._update_question()
         self._options_argspecs = None
@@ -28,9 +28,9 @@ class InquirerExecutorBase:
         )
         if self.carousel:
             kwargs.update(("carousel", self.carousel))
-        self._question = [self.inquirerInstance("omittet", **kwargs)]
+        self._question = [self._inquirerInstance("omittet", **kwargs)]
 
-    # In the interest of failing fast, the user should be made aware of this ASAP
+    # In the interest of failing fast, checking for consistent args and kwargs at creation time
     def _check_arg_consistency(self, func):
         argspec = getargspec(func).args
         print(argspec, self._options_argspecs)
@@ -75,10 +75,6 @@ class InquirerExecutorBase:
         self._options[index] = value
         self._update_question()
 
-    def prompt_user(self, **kwargs):
-        self.answer = prompt(self._question, **kwargs)["omittet"]
-        return self
-
     def insert(self, index, value):
         self._options.insert(index, value)
         self._update_question()
@@ -87,6 +83,10 @@ class InquirerExecutorBase:
     def reorder(self, indices):
         self._options = [self._options[i] for i in indices]
         self._update_question()
+        return self
+
+    def prompt_user(self, **kwargs):
+        self.answer = prompt(self._question, **kwargs)["omittet"]
         return self
 
 
