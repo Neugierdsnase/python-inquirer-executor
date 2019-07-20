@@ -1,0 +1,14 @@
+appdirs==1.4.3
+attrs==19.1.0
+black==19.3b0
+blessings==1.7
+Click==7.0
+coverage==4.5.3
+inquirer==2.6.3
+pexpect==4.7.0
+pkg-resources==0.0.0
+ptyprocess==0.6.0
+python-editor==1.0.4
+readchar==2.0.1
+six==1.12.0
+toml==0.10.0
