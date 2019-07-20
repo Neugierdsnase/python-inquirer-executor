@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from functools import wraps
-from inspect import getargspec
+from inspect import getfullargspec
 from inquirer import List, Checkbox, prompt
 
 
@@ -32,7 +32,7 @@ class InquirerExecutorBase:
 
     # In the interest of failing fast, checking for consistent args and kwargs at creation time
     def _check_arg_consistency(self, func):
-        argspec = getargspec(func).args
+        argspec = getfullargspec(func).args
         print(argspec, self._options_argspecs)
         if self._options_argspecs:
             if not self._options_argspecs == argspec:
