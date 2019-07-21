@@ -60,6 +60,7 @@ class InquirerExecutorBase:
                 raise TypeError(
                     "Only function types (or iterables of them) can be added to an InquirerExecutor instance."
                 )
+            self._check_arg_consistency(item)
         self._options.extend(options)
         self._update_question()
         return self
@@ -72,11 +73,13 @@ class InquirerExecutorBase:
             raise TypeError(
                 "Only function types (or methods) can be part of an InquirerExecutor instance."
             )
+        self._check_arg_consistency(value)
         self._options[index] = value
         self._update_question()
 
     def insert(self, index, value):
         self._options.insert(index, value)
+        self._check_arg_consistency(value)
         self._update_question()
         return self
 
