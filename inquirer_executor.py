@@ -33,8 +33,7 @@ class InquirerExecutorBase:
     # In the interest of failing fast, checking for consistent args and kwargs at creation time
     def _check_arg_consistency(self, func):
         argspec = getfullargspec(func).args
-        print(argspec, self._options_argspecs)
-        if self._options_argspecs:
+        if self._options_argspecs or isinstance(self._options_argspecs, list):
             if not self._options_argspecs == argspec:
                 raise AssertionError(
                     """
