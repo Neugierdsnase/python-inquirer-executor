@@ -1,6 +1,8 @@
 import os
 import sys
 import unittest
+import pexpect
+from readchar import key
 from copy import deepcopy
 from inquirer import List, Checkbox
 
@@ -149,7 +151,12 @@ class TestInquirerExecutorList(unittest.TestCase):
 
     def test_prompting(self):
         # Here is where pexpect might come in handy
-        pass
+        list_testing = pexpect.spawn("python3 tests/examples/list.py")
+        list_testing.expect("Of the given choices, how many puppies is best?")
+        list_testing.send(key.DOWN)
+        list_testing.send(key.DOWN)
+        list_testing.send(key.ENTER)
+        list_testing.expect("three")
 
     def test_finding_function(self):
         pass
