@@ -1,7 +1,12 @@
+import os
+import sys
 import unittest
-import unittest
-from inquirer import List
+from copy import deepcopy
+from inquirer import List, Checkbox
+
+sys.path.append(os.path.realpath("."))
 from inquirer_executor import (
+    InquirerExecutorBase as Base,
     InquirerExecutorList as InqExList,
     InquirerExecutorCheckbox as InqExCheckbox,
 )
@@ -12,7 +17,8 @@ class TestInquirerExecutorList(unittest.TestCase):
     These tests test for properties and functionality of 
     the List class as much as of the Base class.
     Since they are tested here, Base class methods will not be tested again in the Checkbox tests.
-    """ 
+    """
+
     def setUp(self):
         def return_one():
             """Return 1"""
@@ -27,45 +33,132 @@ class TestInquirerExecutorList(unittest.TestCase):
             return True
 
         self.fs = [return_one, return_a_string, return_True]
-        self.inqex = InqExCheckbox.from_iterable("What do you want to return?", self.fs)
+        self.inqex = InqExList.from_iterable("What do you want to return?", self.fs)
 
     def test_existance_attributes(self):
         self.assertEqual(self.inqex.message, "What do you want to return?")
         self.assertEqual(self.inqex.carousel, False)
-        self.assertEqual(self.inqex._inquirerInstance, Checkbox)
+        self.assertEqual(self.inqex._inquirerInstance, List)
         self.assertIs(self.inqex._options, self.fs)
-        self.assertIsInstance(self._question, List)
+        # self.inqex._question is a list, because this is what
+        # inquirer uses to prompt questions
+        self.assertIsInstance(self.inqex._question, list)
+        self.assertIsInstance(*self.inqex._question, List)
+
+    def test_instantiation_of_base_class(self):
+        with self.assertRaises(ValueError):
+            Base("What do you want to return?", self.fs)
+
+    def test_carousel_if_true(self):
+        new_inqex = InqExList("What?", [], carousel=True)
+        self.assertTrue(new_inqex.carousel)
 
     def test_arg_consistency(self):
-        pass
+        def one_arg(anything):
+            return anything
+
+        def same_arg(anything):
+            return True
+
+        def two_args(anything, anything_else):
+            return [anything, anything_else]
+
+        new_inqex = InqExList("Anything?", [one_arg, same_arg])
+
+        self.assertIsInstance(new_inqex, InqExList)
+
+        with self.assertRaises(AssertionError):
+            failing_inqex = InqExList.from_iterable("Anything?", [one_arg, two_args])
 
     def test_iterating(self):
-        pass
-        
+        l = []
+        for f in self.inqex:
+            l.append(f)
+        self.assertListEqual(l, self.fs)
+
     def test_adding(self):
-        # Don't forget to test if answer got updated in _options as well!
-        pass
+        def later_function():
+            return "Whatever"
+
+        def failing_due_to_unwanted_argument(argument):
+            return argument
+
+        inqex_copy = deepcopy(self.inqex)
+
+        inqex_copy += later_function
+        self.assertIn(later_function, inqex_copy._options)
+        # check to see if choices of the _question got updated as well
+        self.assertIn(later_function.__doc__, inqex_copy._question[0].choices)
+
+        with self.assertRaises(AssertionError):
+            inqex_copy += failing_due_to_unwanted_argument
+
+        with self.assertRaises(TypeError):
+            inqex_copy += "somethin that isn't a callable type"
 
     def test_inserting(self):
-        pass 
+        inqex_copy = deepcopy(self.inqex)
+
+        def returns_two():
+            return 2
+
+        inqex_copy.insert(1, returns_two)
+        self.assertEqual(inqex_copy[1](), 2)
+
+        def failing_due_to_unwanted_argument(argument):
+            return argument
+
+        with self.assertRaises(AssertionError):
+            inqex_copy.insert(0, failing_due_to_unwanted_argument)
+
+        with self.assertRaises(TypeError):
+            inqex_copy.insert(2, "something that isn't a callable type")
 
     def test_getting(self):
-        pass
+        returns_one = self.inqex[0]
+        returns_a_string = self.inqex[1]
+        returns_True = self.inqex[2]
+        self.assertEqual(returns_one(), 1)
+        self.assertEqual(returns_a_string(), "a string")
+        self.assertTrue(returns_True())
 
     def test_setting(self):
-        pass
-        
+        inqex_copy = deepcopy(self.inqex)
+
+        def returns_two():
+            return 2
+
+        inqex_copy[0] = returns_two
+        self.assertEqual(inqex_copy[0](), 2)
+
+        def failing_due_to_unwanted_argument(argument):
+            return argument
+
+        with self.assertRaises(AssertionError):
+            inqex_copy[1] = failing_due_to_unwanted_argument
+
+        with self.assertRaises(TypeError):
+            inqex_copy[2] = "something that isn't a callable type"
+
+    def test_reordering(self):
+        inqex_copy = deepcopy(self.inqex)
+        inqex_copy.reorder([2, 0, 1])
+        self.assertEqual(self.inqex[0], inqex_copy[1])
+        self.assertEqual(self.inqex[1], inqex_copy[2])
+        self.assertEqual(self.inqex[2], inqex_copy[0])
+
     def test_prompting(self):
         # Here is where pexpect might come in handy
+        pass
 
     def test_finding_function(self):
         pass
-        
+
     def test_executing_found_function(self):
         pass
 
     def test_prompting_and_executing(self):
-        pass 
+        pass
 
     def tearDown(self):
         pass
@@ -78,6 +171,7 @@ class TestInquirerExecutorCheckbox(unittest.TestCase):
     The Base class methods are being tested in the tests
     for the List class.
     """
+
     def setUp(self):
         def return_one():
             """Return 1"""
@@ -94,16 +188,13 @@ class TestInquirerExecutorCheckbox(unittest.TestCase):
         fs = [return_one, return_a_string, return_True]
         self.inqex = InqExCheckbox.from_iterable("What do you want to return?", fs)
 
-    def test_finding_function(self):
+    def test_finding_functions(self):
         pass
-        
+
     def test_executing_found_function(self):
         pass
 
     def test_prompting_and_executing(self):
-        pass 
-
-    def tearDown(self):
         pass
 
     def tearDown(self):
