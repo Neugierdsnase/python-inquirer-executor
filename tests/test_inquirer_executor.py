@@ -96,7 +96,7 @@ class TestInquirerExecutorList(unittest.TestCase):
             inqex_copy += failing_due_to_unwanted_argument
 
         with self.assertRaises(TypeError):
-            inqex_copy += "somethin that isn't a callable type"
+            inqex_copy += "something that isn't a callable type"
 
     def test_inserting(self):
         inqex_copy = deepcopy(self.inqex)
@@ -150,25 +150,53 @@ class TestInquirerExecutorList(unittest.TestCase):
         self.assertEqual(self.inqex[2], inqex_copy[0])
 
     def test_prompting(self):
-        # Here is where pexpect might come in handy
-        list_testing = pexpect.spawn("python3 tests/examples/list.py")
-        list_testing.expect("Of the given choices, how many puppies is best?")
+        """
+        TODO: I was unable to include this test in the coverage report.
+        The statements covered with this test are therefore excluded
+        via the .coveragerc file.
+        """
+        list_testing = pexpect.spawn(
+            "coverage run --parallel-mode tests/examples/list.py slow"
+        )
+        list_testing.expect(
+            "Of the given choices, how many puppies is best?", timeout=1
+        )
         list_testing.send(key.DOWN)
         list_testing.send(key.DOWN)
         list_testing.send(key.ENTER)
-        list_testing.expect("three")
+        list_testing.expect("Three", timeout=1)
+        list_testing.expect("True", timeout=1)
 
-    def test_finding_function(self):
-        pass
+    def test_finding_functions(self):
+        inqex_copy = deepcopy(self.inqex)
+        inqex_copy.answer = 'Return "a string" '
+        self.assertEqual(inqex_copy.find_function(), self.inqex[1])
 
     def test_executing_found_function(self):
-        pass
+        inqex_copy = deepcopy(self.inqex)
+
+        with self.assertRaises(ValueError):
+            inqex_copy.execute()
+
+        inqex_copy.answer = 'Return "a string" '
+        self.assertEqual(inqex_copy.execute(), "a string")
 
     def test_prompting_and_executing(self):
-        pass
-
-    def tearDown(self):
-        pass
+        """
+        TODO: I was unable to include this test in the coverage report.
+        The statements covered with this test are therefore excluded
+        via the .coveragerc file.
+        """
+        list_testing = pexpect.spawn(
+            "coverage run --parallel-mode tests/examples/list.py fast"
+        )
+        list_testing.expect(
+            "Of the given choices, how many puppies is best?", timeout=1
+        )
+        list_testing.send(key.DOWN)
+        list_testing.send(key.DOWN)
+        list_testing.send(key.ENTER)
+        list_testing.expect("three", timeout=1)
 
 
 class TestInquirerExecutorCheckbox(unittest.TestCase):
@@ -195,6 +223,28 @@ class TestInquirerExecutorCheckbox(unittest.TestCase):
         fs = [return_one, return_a_string, return_True]
         self.inqex = InqExCheckbox.from_iterable("What do you want to return?", fs)
 
+    def test_existance_execution_stack(self):
+        self.assertEqual(self.inqex.execution_stack, [])
+
+    def test_prompting(self):
+        """
+        TODO: I was unable to include this test in the coverage report.
+        The statements covered with this test are therefore excluded
+        via the .coveragerc file.
+        """
+        list_testing = pexpect.spawn(
+            "coverage run --parallel-mode tests/examples/checkbox.py slow"
+        )
+        list_testing.expect("What is fluffy and cuddly?", timeout=1)
+        list_testing.send(key.RIGHT)
+        list_testing.send(key.DOWN)
+        list_testing.send(key.DOWN)
+        list_testing.send(key.RIGHT)
+        list_testing.send(key.ENTER)
+        # TODO: This should **NOT** pass!!!!!!!!
+        list_testing.expect_exact("Stones.", timeout=1)
+        list_testing.expect_exact("Kittens.", timeout=1)
+
     def test_finding_functions(self):
         pass
 
@@ -202,7 +252,4 @@ class TestInquirerExecutorCheckbox(unittest.TestCase):
         pass
 
     def test_prompting_and_executing(self):
-        pass
-
-    def tearDown(self):
         pass
