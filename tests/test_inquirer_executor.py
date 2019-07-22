@@ -173,23 +173,6 @@ class TestInquirerExecutorList(unittest.TestCase):
         inqex_copy.answer = 'Return "a string" '
         self.assertEqual(inqex_copy.execute(), "a string")
 
-    def test_prompting_and_executing(self):
-        """
-        TODO: I was unable to include this test in the coverage report.
-        The statements covered with this test are therefore excluded
-        via the .coveragerc file.
-        """
-        list_testing = pexpect.spawn(
-            "coverage run --parallel-mode tests/examples/list.py fast"
-        )
-        list_testing.expect(
-            "Of the given choices, how many puppies is best?", timeout=1
-        )
-        list_testing.send(key.DOWN)
-        list_testing.send(key.DOWN)
-        list_testing.send(key.ENTER)
-        list_testing.expect("three", timeout=1)
-
 
 class TestInquirerExecutorCheckbox(unittest.TestCase):
     """
@@ -234,5 +217,3 @@ class TestInquirerExecutorCheckbox(unittest.TestCase):
     def test_executing_found_function(self):
         pass
 
-    def test_prompting_and_executing(self):
-        pass
