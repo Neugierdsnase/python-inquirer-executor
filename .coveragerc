@@ -1,4 +1,6 @@
 # .coveragerc to control coverage.py
 
 [run]
-include = inquirer_executor.py
+include = 
+  inquirer_executor.py
+parallel = True

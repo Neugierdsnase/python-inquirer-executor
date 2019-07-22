@@ -104,7 +104,7 @@ class InquirerExecutorList(InquirerExecutorBase):
     def execute(self, *args, **kwargs):
         if not self.answer:
             raise ValueError("Execution not possible since no answer was provided.")
-        self.find_function()(*args, **kwargs)
+        return self.find_function()(*args, **kwargs)
 
     def prompt_and_execute(self, *args, **kwargs):
         theme = kwargs.pop("theme", None)
