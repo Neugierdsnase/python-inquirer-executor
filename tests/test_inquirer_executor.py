@@ -1,7 +1,6 @@
 import os
 import sys
 import unittest
-import pexpect
 from readchar import key
 from copy import deepcopy
 from inquirer import List, Checkbox
@@ -164,7 +163,7 @@ class TestInquirerExecutorList(unittest.TestCase):
         inqex_copy.answer = 'Return "a string" '
         self.assertEqual(inqex_copy.find_function(), self.inqex[1])
 
-    def test_executing_found_function(self):
+    def test_executing(self):
         inqex_copy = deepcopy(self.inqex)
 
         with self.assertRaises(ValueError):
