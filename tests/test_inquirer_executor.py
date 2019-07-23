@@ -148,6 +148,14 @@ class TestInquirerExecutorList(unittest.TestCase):
         self.assertEqual(self.inqex[1], inqex_copy[2])
         self.assertEqual(self.inqex[2], inqex_copy[0])
 
+    def test_reversing(self):
+        inqex_copy = deepcopy(self.inqex)
+        inqex_copy.reverse()
+        self.assertListEqual(inqex_copy._options, self.inqex[::-1])
+        self.assertListEqual(
+            inqex_copy._question[0].choices, self.inqex._question[0].choices[::-1]
+        )
+
     def test_removing(self):
         inqex_copy = deepcopy(self.inqex)
 

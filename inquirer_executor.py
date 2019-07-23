@@ -87,6 +87,11 @@ class InquirerExecutorBase:
         self._update_question()
         return self
 
+    def reverse(self):
+        self._options.reverse()
+        self._update_question()
+        return self
+
     def remove(self, function_name_or_index):
         if isinstance(function_name_or_index, str):
             self._options = [
