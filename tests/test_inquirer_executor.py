@@ -211,8 +211,18 @@ class TestInquirerExecutorCheckbox(unittest.TestCase):
         pass
 
     def test_finding_functions(self):
-        pass
+        inqex_copy = deepcopy(self.inqex)
+        inqex_copy.answer = ['Return "a string" ', "Return boolean value True"]
+        self.assertEqual(inqex_copy.find_functions(), [self.inqex[1], self.inqex[2]])
 
-    def test_executing_found_function(self):
-        pass
+    def test_executing(self):
+        inqex_copy = deepcopy(self.inqex)
+
+        with self.assertRaises(ValueError):
+            inqex_copy.execute()
+
+        inqex_copy.answer = ['Return "a string" ', "Return boolean value True"]
+        inqex_copy.find_functions()
+        for result in inqex_copy.execute():
+            self.assertIn(result, ["a string", True])
 
