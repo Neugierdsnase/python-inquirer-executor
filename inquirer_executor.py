@@ -87,6 +87,20 @@ class InquirerExecutorBase:
         self._update_question()
         return self
 
+    def remove(self, function_name_or_index):
+        if isinstance(function_name_or_index, str):
+            self._options = [
+                option
+                for option in self._options
+                if option.__name__ != function_name_or_index
+            ]
+            self._update_question()
+        elif isinstance(function_name_or_index, int):
+            del self._options[function_name_or_index]
+            self._update_question()
+        else:
+            raise ValueError("You can only remove functions by index or function name.")
+
     def prompt_user(self, **kwargs):
         self.answer = prompt(self._question, **kwargs)["omittet"]
         return self

@@ -148,6 +148,22 @@ class TestInquirerExecutorList(unittest.TestCase):
         self.assertEqual(self.inqex[1], inqex_copy[2])
         self.assertEqual(self.inqex[2], inqex_copy[0])
 
+    def test_removing(self):
+        inqex_copy = deepcopy(self.inqex)
+
+        with self.assertRaises(ValueError):
+            inqex_copy.remove(["this", "and", "that"])
+
+        # removing by function name
+        inqex_copy.remove("return_one")
+        self.assertListEqual(inqex_copy._options, [self.inqex[1], self.inqex[2]])
+        self.assertEqual(len(inqex_copy._question[0].choices), 2)
+
+        # removing by index
+        inqex_copy.remove(0)
+        self.assertListEqual(inqex_copy._options, [self.inqex[2]])
+        self.assertEqual(len(inqex_copy._question[0].choices), 1)
+
     def test_prompting(self):
         """
         Prompting is already being sufficiently tested in
