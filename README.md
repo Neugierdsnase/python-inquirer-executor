@@ -1,9 +1,9 @@
 # python-inquirer-executor
-This is a wrapper around [python-inquirer](https://github.com/magmax/python-inquirer). From this project's README:
+This is a wrapper around [python-inquirer](https://github.com/magmax/python-inquirer). From that project's README:
 
 > So, **Inquirer** should ease the process of asking end user **questions**, **parsing**, **validating** answers, managing **hierarchical prompts** and providing **error feedback**.
 
-This package extends this thought by building classes on top of it to create prompts that will automatically call one or more functions corresponding to user's choice, while keeping you code nice, tidy and readable. This is achieved by facilitating the docstring of your functions as user-facing representaion of themselves (which is what docstrings (kinda) are intended to be anyways). 
+This package extends this thought by building classes on top of it to create prompts that will automatically call one or more functions corresponding to user's choice, while keeping you code nice, tidy and readable. This is achieved by facilitating the docstring of your functions as user-facing representaion of themselves (which is what docstrings are (kind of) intended to be anyways). 
 
 ## How to use
 ### Installation
@@ -14,7 +14,7 @@ from inquirer_executor import InquirerExecutorList
 
 question = InquirerExecutorList("Question you want to ask the user?", list_of_functions)
 ```
-The list of functions can be any iterable that is exlusively composed of function types. The class will generate the question from the string you privided as the first argument and give the user the option of choosing a function. These options will be represented by the function's corresponding **docstring**. 
+The list of functions can be any iterable that is exlusively composed of function types. The class will generate the question from the string you privided as the first argument and a list of functions that will be presented to the user as selectable options. These options will be represented by the function's corresponding **docstring**. 
 
 #### Example
 
@@ -85,7 +85,7 @@ question2 = InquirerExecutorCheckbox("Of the given choices, which ones are furry
 This will create the instance of the question. Again, you now have `prompt_user()` and `prompt_and_execute()` methods at your disposal. Once you have generated an answer with the `prompt_user()` method, you can:
 - use the `find_functions()` *(mind the plural 's')* method to return the corresponding list of functions to the users answer
 - access the instances `answer` value to read the user's answers (a list of the docstrings they have selected)
-- use the `execute()` method to execute the users choices at a later point (the function itself always returns `None`)
+- use the `execute()` method to execute the users choices at a later point (the function itself returns a list of the functions return values)
 
 For now though, we are again just going to use `prompt_and_execute()` to get this result:
 ```
@@ -99,38 +99,45 @@ kittens
 ```
 The user has checked options one and three and the corresponing functions got called.
 
-*Keep in mind that in this case `prompt_and_execute()` always returns `None`.*
+*Keep in mind that in this case `prompt_and_execute()` always returns **a list**.*
 
-### Using this as part of a whole catalogue of questions
+### Mutating the question after instantiation
 
-#### Example
+#### Adding
+
+There are two ways to add functions to InquirerExecutor instances after they have been created. The first one is the `+``operater, that will append the added function to the end of the choices associated with the question.
+
+The second one is the `insert(index, value)` method, that will insert a `value` (which in this case has to be a function type) at `index`. Use it like you are used to from the `list` type.
+
+#### Setting
+
+You can also set new values as you are used to like 
+```python
+instance[0] = new_value
+```
+where again, `new_value` needs to be a function type.
+
+#### Reordering
+
+InquirerExecutor provides a `reorder(indices)` method where indices is a list of numbers that represent the new order, so when given `[2, 0, 1]`, the original index 0 would be moved to index 2, original index 1 moved to 0 and 2 to 1.
+
+You can also use the `reverse()` method, which also works like you are used to from `list` types.
+
+#### Removing
+
+InquirerExecutor provides a `remove(value)` method, that excepts **either** a **function name** as string **or an index** as number as it's `value` argument. In both cases, the matching function is removed from the user's choices.
+
+### Passing arguments
+
+You can of course pass whatever arguments you like to your functions. Just keep in mind, that potentially any and every function will be called, so all of your functions *must* accept the **same** arguments and keywords. To prevent possible errors down the road, InquirerExecuter **enforces this** at creation time and will throw an `AssertionError` if the arguments and keyword arguments of your functions don't match.
 
 ### Theming
 
 You can use [python-inquirer's built-in theming options](https://magmax.org/python-inquirer/usage.html#themes) with the key difference that you have **instantiate** the theme **before using it**. You then pass the **instance** to the `prompt_user()` or `prompt_and_execute()` methods using the `theme` keyword, **not** the theme class.
 
-### Additional notes on usage
-- Adding options later
-  - using the `+` operator
-    
-    You can just ...
+### Using this as part of a whole catalogue of questions
 
-  - using the `insert()` method
-
-    You can also ...
-
-- Mutating options
-  - setting an item
-
-    You can ...
-  - using the `reorder()` method
-
-    Or you could...
-
-- Passing arguments and keyword arguments
-
-  - You can of course pass whatever arguments you like to your functions. Just keep in mind, that potentially any and every function will be called, so all of your functions *must* accept the **same** arguments and keyword arguments. To prevent possible errors down the road, InquirerExecuter checks for this at creation time and will throw an `AssertionError` if the arguments and keyword arguments of your functions don't match.
-
+#### Example
 
 ## Raison D'être
 
