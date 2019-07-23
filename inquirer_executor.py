@@ -125,17 +125,20 @@ class InquirerExecutorCheckbox(InquirerExecutorBase):
         return self.execution_stack
 
     def execute(self, *args, **kwargs):
+        r = []
         if not self.execution_stack:
             raise ValueError("Execution not possible since no answer was provided.")
         for function in self.execution_stack:
-            function(*args, **kwargs)
+            r.append(function(*args, **kwargs))
+        return r
 
     def prompt_and_execute(self, *args, **kwargs):
+        r = []
         theme = kwargs.pop("theme", None)
         self.prompt_user(theme=theme).find_functions()
         for function in self.execution_stack:
-            function(*args, **kwargs)
-        return self.execution_stack
+            r.append(function(*args, **kwargs))
+        return r
 
 
 class QuestionsCatalogue(list):
