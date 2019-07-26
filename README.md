@@ -3,18 +3,20 @@ This is a wrapper around [python-inquirer](https://github.com/magmax/python-inqu
 
 > So, **Inquirer** should ease the process of asking end user **questions**, **parsing**, **validating** answers, managing **hierarchical prompts** and providing **error feedback**.
 
-This package extends this thought by building classes on top of it to create prompts that will automatically call one or more functions corresponding to user's choice, while keeping you code nice, tidy and readable. This is achieved by facilitating the docstring of your functions as user-facing representaion of themselves (which is what docstrings are (kind of) intended to be anyways). 
+This package extends this thought by building classes on top of it to create prompts that will automatically call one or more functions corresponding to the user's choice, while keeping your code nice, tidy and readable. This is achieved by facilitating the docstring of your functions as user-facing representaion of these functions. 
 
 ## How to use
 ### Installation
-As of right now, the only way to use this is to download it from this GitHub repository.
-### As a single-choice list
+
+As of right now, the only way to use this is to download it from this GitHub repository. You can also manually copy paste this into your project since the whole code is contained in a single file.
+
+### Creating a single-choice question (List)
 ```python
 from inquirer_executor import InquirerExecutorList 
 
 question = InquirerExecutorList("Question you want to ask the user?", list_of_functions)
 ```
-The list of functions can be any iterable that is exlusively composed of function types. The class will generate the question from the string you privided as the first argument and a list of functions that will be presented to the user as selectable options. These options will be represented by the function's corresponding **docstring**. 
+The `list_of_functions` can be any iterable that is exlusively composed of function types. The class will generate the question from the string you provided as the first argument and a list of functions that will be presented to the user as selectable options. These options will be represented by the given function's corresponding **docstring**. 
 
 #### Example
 
@@ -37,7 +39,7 @@ question = InquirerExecutorList("Of the given choices, how many puppies is best?
 ```
 This will create the instance of the question. You now have `prompt_user()` and `prompt_and_execute()` methods at your disposal. Once you have used the `prompt_user()` method, and the user has provided an answer, you can also:
 - use the `find_function()` method to return the corresponding function to the user's answer
-- access the instances `answer` value to read the user's answer (the docstring they have selected)
+- access the instances `answer` value to read the user's answer (the docstring they have selected *as* string)
 - use the `execute()` method to execute the users choice at a later point (the function returns the return value of the function called)
 
 For now though, we are just going to use `prompt_and_execute()` to see the results right away:
@@ -55,7 +57,7 @@ three
 ```
 The user has chosen from the docstrings representing the functions and the function got executed, printing 'three'. Neat.
 
-### As a multiple-choice checkbox
+### Creating a multiple-choice question (Checkbox)
 ```python
 from inquirer_executor import InquirerExecutorCheckbox
 
@@ -105,7 +107,7 @@ The user has checked options one and three and the corresponing functions got ca
 
 #### Adding
 
-There are two ways to add functions to InquirerExecutor instances after they have been created. The first one is the `+``operater, that will append the added function to the end of the choices associated with the question.
+There are two ways to add functions to InquirerExecutor instances after they have been created. The first one is the `+` operator, that will append the added function to the end of the choices associated with the question.
 
 The second one is the `insert(index, value)` method, that will insert a `value` (which in this case has to be a function type) at `index`. Use it like you are used to from the `list` type.
 
@@ -125,7 +127,7 @@ You can also use the `reverse()` method, which also works like you are used to f
 
 #### Removing
 
-InquirerExecutor provides a `remove(value)` method, that excepts **either** a **function name** as string **or an index** as number as it's `value` argument. In both cases, the matching function is removed from the user's choices.
+InquirerExecutor provides a `remove(value)` method, that excepts **either** a **function name** as string **or an index** as number as it's `value` argument. In both cases, the matching function is removed from the choices presented to the user.
 
 ### Passing arguments
 
@@ -133,15 +135,92 @@ You can of course pass whatever arguments you like to your functions. Just keep 
 
 ### Theming
 
-You can use [python-inquirer's built-in theming options](https://magmax.org/python-inquirer/usage.html#themes) with the key difference that you have **instantiate** the theme **before using it**. You then pass the **instance** to the `prompt_user()` or `prompt_and_execute()` methods using the `theme` keyword, **not** the theme class.
+You can use [python-inquirer's built-in theming options](https://magmax.org/python-inquirer/usage.html#themes) with the key difference that you have to **instantiate** the theme **before using it**. You then pass the **instance** to the `prompt_user()` or `prompt_and_execute()` methods using the `theme` keyword, **not** the theme class.
 
 ### Using this as part of a whole catalogue of questions
 
+Depending on what you are trying to achieve you might want to organize the questions yourself in a manner that fits your use case best. For simple applications, InquirerExecutor provides a `QuestionsCatalogue` class, that can be instantiated with a n iterable type that consists of either `inquirer` or `inquirer_executor` objects. 
+
+The `QuestionsCatalogue` handles these objects so they feel just like a list of functions and equips you with it's `prompt_all()` method. This method returns a tuple of two items: 1) A dictionairy of all the answers given to the Text, Path, etc. prompts that you may have used directly from `inquirer` and 2) a list of functions the user has chosen from single- and multiple-choice questions in the `QuestionsCatalogue`. In order to keep everything human-readable and easy to reason about, this class provides no way of directly calling all functions, you need to call them yourself however and whenever you see fit.
+
 #### Example
+
+```python
+from inquirer import Text
+from inquirer_executor import (
+    InquirerExecutorList as InqExList,
+    InquirerExecutorCheckbox as InqExCheckbox,
+    QuestionsCatalogue,
+)
+
+def return_one():
+    """Return 1"""
+    return 1
+
+
+def return_two():
+    """Return 2"""
+    return 2
+
+
+def return_three():
+    """Return 3"""
+    return 3
+
+
+def return_four():
+    """Return 4"""
+    return 4
+
+
+def return_five():
+    """Return 5"""
+    return 5
+
+
+inqex_checkbox = InqExCheckbox.from_iterable(
+    "What do you want to return?", [return_one, return_two]
+)
+
+inqex_list = InqExList.from_iterable(
+    "What do you want to return?", [return_three, return_four, return_five]
+)
+
+text_question_first_name = Text("first_name", message="What's your first name")
+
+text_question_last_name = Text("last_name", message="What's your last name")
+
+questions_catalogue = QuestionsCatalogue(
+    [inqex_checkbox, inqex_list, text_question_first_name, text_question_last_name]
+)
+
+print(questions_catalogue.prompt_all())
+
+```
+Assuming the user checked both options at the checkbox and chose "Return 4" at the single choice question and he is a billionaire from Gotham City the above code would produce something like this:
+
+```
+[?] What do you want to return?: 
+   X Return 1
+ > X Return 2
+
+[?] What do you want to return?: Return 4
+   Return 3
+ > Return 4
+   Return 5
+
+[?] What's your first name: Bruce
+[?] What's your last name: Wayne
+({'first_name': 'Bruce', 'last_name': 'Wayne'}, [<function return_one at 0x7f516964de18>, <function return_two at 0x7f51663a4d90>, <function return_four at 0x7f516611bd08>])
+```
 
 ## Raison D'être
 
 I needed this myself.
+
+## Contributing
+
+Contributions and improvements are very welcome. Please write a test for your code contribution and use the [Black code formatter](https://pypi.org/project/black/) when editing the code in this project.
 
 ## License
 
