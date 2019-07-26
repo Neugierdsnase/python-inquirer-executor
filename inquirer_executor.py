@@ -2,7 +2,7 @@
 
 from functools import wraps
 from inspect import getfullargspec
-from inquirer import List, Checkbox, prompt
+from inquirer import List, Checkbox, prompt, Path, Editor, Text
 
 
 class InquirerExecutorBase:
@@ -167,9 +167,44 @@ class QuestionsCatalogue(list):
     question before starting to execute the users choices.
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, list_of_questions):
+        if not isinstance(list_of_questions, (list, tuple, set, frozenset)):
+            raise TypeError("You need to instantiate this class with an iterable type.")
+        l = []
+        for question in list_of_questions:
+            l.append(self._check_item_type(question))
+        super().__init__(l)
         self.execution_stack = []
+        self.answer_dict = {}
 
-    pass
+    @staticmethod
+    def _check_item_type(question):
+        if not isinstance(
+            question,
+            (
+                List,
+                Checkbox,
+                Path,
+                Editor,
+                Text,
+                InquirerExecutorCheckbox,
+                InquirerExecutorList,
+            ),
+        ):
+            raise TypeError(
+                "Every item in the iterable must be an instance of an Inquirer or InquirerExecutor class."
+            )
+        return question
+
+    def prompt_all(self):
+        for question in self:
+            if isinstance(question, InquirerExecutorList):
+                question.prompt_user()
+                self.execution_stack.append(question.find_function())
+            elif isinstance(question, InquirerExecutorCheckbox):
+                question.prompt_user()
+                self.execution_stack.extend(question.find_functions())
+            else:
+                self.answer_dict.update(prompt([question]))
+        return (self.answer_dict, self.execution_stack)
 

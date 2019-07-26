@@ -3,13 +3,14 @@ import sys
 import unittest
 from readchar import key
 from copy import deepcopy
-from inquirer import List, Checkbox
+from inquirer import List, Checkbox, Text
 
 sys.path.append(os.path.realpath("."))
 from inquirer_executor import (
     InquirerExecutorBase as Base,
     InquirerExecutorList as InqExList,
     InquirerExecutorCheckbox as InqExCheckbox,
+    QuestionsCatalogue,
 )
 
 
@@ -250,3 +251,90 @@ class TestInquirerExecutorCheckbox(unittest.TestCase):
         for result in inqex_copy.execute():
             self.assertIn(result, ["a string", True])
 
+
+class TestQuestionsCatalogue(unittest.TestCase):
+    def setUp(self):
+        def return_one():
+            """Return 1"""
+            return 1
+
+        def return_two():
+            """Return 2"""
+            return 2
+
+        def return_three():
+            """Return 3"""
+            return 3
+
+        def return_four():
+            """Return 4"""
+            return 4
+
+        def return_five():
+            """Return 5"""
+            return 5
+
+        self.inqex_checkbox = InqExCheckbox.from_iterable(
+            "What do you want to return?", [return_one, return_two]
+        )
+        self.inqex_list = InqExList.from_iterable(
+            "What do you want to return?", [return_three, return_four, return_five]
+        )
+        self.text_question_first_name = Text(
+            "first_name", message="What's your first name"
+        )
+        self.text_question_last_name = Text(
+            "last_name", message="What's your last name"
+        )
+
+        self.questions_catalogue = QuestionsCatalogue(
+            [
+                self.inqex_checkbox,
+                self.inqex_list,
+                self.text_question_first_name,
+                self.text_question_last_name,
+            ]
+        )
+
+    def test_existance_attributes(self):
+        self.assertIsInstance(self.questions_catalogue.execution_stack, list)
+        self.assertIsInstance(self.questions_catalogue.answer_dict, dict)
+
+    def test_error_on_invalid_arguments(self):
+        with self.assertRaises(TypeError):
+            QuestionsCatalogue("an ordinairy string")
+
+        with self.assertRaises(TypeError):
+            QuestionsCatalogue(
+                [
+                    self.inqex_list,
+                    self.text_question_last_name,
+                    "an ordinairy string as list item",
+                ]
+            )
+
+        # While the above two should fail, the following is allowed and should pass
+        self.assertIsInstance(
+            QuestionsCatalogue(
+                [
+                    self.inqex_list,
+                    self.text_question_last_name,
+                    self.text_question_first_name,
+                ]
+            ),
+            QuestionsCatalogue,
+        )
+
+    def test_prompting(self):
+        """
+        Prompting is hard to test.
+        In this case, prompting itself is already being 
+        sufficiently tested in the original python-inquirer 
+        library. 
+        Whether or not the QuestionsCatalogue's prompt_all()
+        method calls the right prompts on the individual 
+        questions has extensively been tested manually, 
+        but an automated unittest for this matter is not yet
+        implemented. TODO HELP PLEASE: If you read this and have a sensible idea on how to implement this, please do tell.
+        """
+        pass
