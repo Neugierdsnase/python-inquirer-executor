@@ -11,6 +11,7 @@ from inquirer_executor import (
     InquirerExecutorList as InqExList,
     InquirerExecutorCheckbox as InqExCheckbox,
     QuestionsCatalogue,
+    dynamic_docstring_decorator,
 )
 
 
@@ -338,3 +339,15 @@ class TestQuestionsCatalogue(unittest.TestCase):
         implemented. TODO HELP PLEASE: If you read this and have a sensible idea on how to implement this, please do tell.
         """
         pass
+
+
+class TestDocstringDecorator(unittest.TestCase):
+    def test_decorator(self):
+        @dynamic_docstring_decorator("Overwritten docstring")
+        def some_function():
+            """Some docstring."""
+            return True
+
+        self.assertEqual(some_function.__name__, "some_function")
+        self.assertEqual(some_function.__doc__, "Overwritten docstring")
+        self.assertTrue(some_function())
