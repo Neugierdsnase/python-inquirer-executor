@@ -38,7 +38,7 @@ sys.path.append(os.path.realpath("."))
 from inquirer_executor import (
     InquirerExecutorList as InqExList,
     InquirerExecutorCheckbox as InqExCheckbox,
-    QuestionsCatalogue,
+    dynamic_docstring_decorator,
 )
 
 
@@ -225,7 +225,13 @@ def inside_castle():
     # This function showcases a rather uncomfortable edge case:
     # Upon defining the function you cannot dynamically format
     # the docstring.
-    # So the function gets defined without a docstring and below...
+    # Luckily InquirerExecutor provides a decorator that makes this
+    # possible
+    @dynamic_docstring_decorator(
+        "Drop your {} and pick up a magic sword instead for increased attack.".format(
+            hero.weapon
+        )
+    )
     def choose_magic_sword():
         old_weapon = hero.weapon
         hero.weapon = "magic sword"
@@ -236,10 +242,11 @@ def inside_castle():
             )
         )
 
-    # ... we set the docstring to include the weapon the player originally chose.
-    choose_magic_sword.__doc__ = "Drop your {} and pick up a magic sword instead for increased attack.".format(
-        hero.weapon
-    )
+    # Note: Instead of using the decorator, you could also just
+    # set the __doc__ attribute of your function after defining  the function.
+    # This would work in this particular case, but not when you are dealing
+    # with methods, since the __doc__ attribute of a method is not writable,
+    # which is why this decorator exists.
 
     def choose_jewels():
         """Jewels you might be able to sell or trade in for something else."""
