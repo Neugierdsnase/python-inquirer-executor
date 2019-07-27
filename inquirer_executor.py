@@ -208,3 +208,14 @@ class QuestionsCatalogue(list):
                 self.answer_dict.update(prompt([question]))
         return (self.answer_dict, self.execution_stack)
 
+
+def dynamic_docstring_decorator(docstring):
+    def dynamic_docstring_decorator_wrap(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        wrapper.__doc__ = docstring
+        return wrapper
+
+    return dynamic_docstring_decorator_wrap
