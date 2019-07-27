@@ -137,6 +137,34 @@ You can of course pass whatever arguments you like to your functions. Just keep 
 
 You can use [python-inquirer's built-in theming options](https://magmax.org/python-inquirer/usage.html#themes) with the key difference that you have to **instantiate** the theme **before using it**. You then pass the **instance** to the `prompt_user()` or `prompt_and_execute()` methods using the `theme` keyword, **not** the theme class.
 
+### Dynamically setting docstrings
+
+This package makes it sometimes necessary - or at least preferable - to generate docstrings dynamically. This could be achieved by defining the docstring after you define the function like so:
+
+```python
+name = input("What is your name?")
+
+def some_function():
+    """Can't display the name variable here."""
+    return name
+
+some_function.__doc__ = "Returns your name: {}".format(name)
+```
+This is possible and valid as long as you are dealing with *normal* functions. As soon as you are trying to do this with methods inside a class, Python will raise an error telling you that the `__doc__` attribute of methods is not writable.
+
+For this reason InquirerExecutor provides a decorator named `dynamic_docstring_decorator` that can be used to set dynamic docstrings. The above code rewritten with the decorator would look like this:
+
+```python
+from inquirer_executor import dynamic_docstring_decorator
+
+@dynamic_docstring_decorator("Returns your name: {}".format(name))
+def some_function():
+    """Can't display the name variable here."""          # This docstring gets overwritten
+    return name
+```
+
+Much nicer and cleaner!
+
 ### Using this as part of a whole catalogue of questions
 
 Depending on what you are trying to achieve you might want to organize the questions yourself in a manner that fits your use case best. For simple applications, InquirerExecutor provides a `QuestionsCatalogue` class, that can be instantiated with a n iterable type that consists of either `inquirer` or `inquirer_executor` objects. 
