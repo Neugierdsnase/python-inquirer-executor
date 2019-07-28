@@ -47,10 +47,12 @@ from inquirer_executor import (
     dynamic_docstring_decorator,
 )
 
-# You will be able to do three things with this contact book:
-# 1) List all contacts (and then edit them a bit)
-# 2) Add a new contact
-# 3) Delete contacts
+# You will be able to do five things with this contact book application:
+# 1) List all contacts (which opens a sub menu for viewing/editing the contact)
+# 2) List contacts on the favourites list
+# 3) Add a new contact
+# 4) Delete contacts
+# 5) Quit the application
 
 # First things first, lets start with some mock data:
 
@@ -94,11 +96,11 @@ data = [
 
 # This data could of course also be imported from
 # a database, a csv, tsv, a shelve or whatever.
+# This example omits any part that would involve
+# saving persistant data.
 #
-# Now that we have our data, let's define a class
+# Anyways, let's define a class
 # representing the entries.
-
-favourites = []
 
 
 class Entry:
@@ -113,7 +115,24 @@ class Entry:
     def create(cls, first_name, last_name, known_for, *args, **kwargs):
         return cls(first_name, last_name, known_for, *args, **kwargs).prepare()
 
+    # As you can see, the classmethod above calls the method below when creating
+    # the class. Why is that? Well, the two methods that are being defined in the
+    # `prepare` method need dynamically generated docstrings.
+    # Since the docstrings of methods aren't writable, they rely on the
+    # `dynamic_docstring_decorator` imported from inquirer-executor to achieve this.
+    #
+    # Now, (in this case at least), the decorator needs to be called at a point
+    # where it is in scope to use `self.first_name` and `self.last_name`, which I
+    # achieve here by wrapping the whole show in a method with access to the instance's
+    # `self` value.
+    #
+    # Another way of doing this would be to just do this inside the `__init__` method,
+    # but that would only add one more questionable decision to what already is not
+    # exactly the cleanest of codes. (Althought - I would argue - is worth it,
+    # considering the hassle it saves you.)
+
     def prepare(self):
+        # In here, the decorator is in scope to use `self.first_name` and `self.last_name`
         @dynamic_docstring_decorator("{} {}".format(self.first_name, self.last_name))
         def show_options():
             options = InqExList(
@@ -122,15 +141,18 @@ class Entry:
                 ),
                 [self.inspect, self.do_nothing, self.change_number, self.change_email],
             )
+            # The InqExList isn't prompted right away, first we add another method,
+            # depending on whether or not the instance is already on the favourites list.
             if self in favourites:
                 options += self.remove_from_favourites
             else:
                 options += self.add_to_favourites
-
+            # After the conditional option is added, we finally prompt the user.
             options.prompt_and_execute()
 
         self.show_options = show_options
 
+        # Another method that needs a dynamically generated docstring
         @dynamic_docstring_decorator(
             "Delete {} {}".format(self.first_name, self.last_name)
         )
@@ -147,13 +169,14 @@ class Entry:
         return "<Entry object for {} {}>".format(self.first_name, self.last_name)
 
     def __str__(self):
-        """Show contact info."""
         return "Name: {0} {1}\nphone: {2}\nemail: {3}\nknown for: {4}\n".format(
             self.first_name, self.last_name, self.phone, self.email, self.known_for
         )
 
+    # All of these remaining methods are part of the submenus connected to the
+    # individual entries.
     def inspect(self):
-        """See this person's contact info."""
+        """Show contact info."""
         print(str(self))
 
     def add_to_favourites(self):
@@ -167,12 +190,16 @@ class Entry:
 
     def change_number(self):
         """Change the phone number for this contact."""
+        # If you are thinking: "Wouldn't a simple `input` call do it here?"
+        # Yes it would, but that's not what we are doing here, is it? ;)
         self.phone = prompt(
             [Text("new_number", message="Please enter the new phone number")]
         )["new_number"]
 
     def change_email(self):
         """Change the email for this contact."""
+        # If you are thinking: "Wouldn't a simple `input` call do it here?"
+        # Yes it would, but that's not what we are doing here, is it? ;)
         self.email = prompt(
             [Text("new_email", message="Please enter the new email adress")]
         )["new_email"]
@@ -182,7 +209,7 @@ class Entry:
         pass
 
 
-# Lets a list containing objects representing all our data
+# Lets create a list holding all our data ...
 entries = [
     Entry.create(
         entry["first_name"],
@@ -193,10 +220,17 @@ entries = [
     )
     for entry in data
 ]
+# ... and a seperate list for the favourites.
+favourites = []
 
 
-# The following four functions represent the main menu options
-def list_all_constacts():
+# The following five functions represent the main menu options
+# we have determined at the very top.
+
+# This is one of the functions with a dynamically generated
+# docstring, which is why we can handily and aptly generate all
+# options with a list comprehension. Pretty neat.
+def list_all_contacts():
     """List all the contacts"""
     if not entries:
         print("Your cantact book is empty.")
@@ -217,9 +251,16 @@ def list_favourites():
         ).prompt_and_execute()
 
 
+# For adding a new contact we utilize the `QuestionsCatalogue`
+# class of the inquirer-executor package, which returns a tuple
+# of a dict of answers and a list of selected functions
 def add_new_contact():
     """Add a new contact to the contact book."""
 
+    # When creating a multiple choice question from the next two
+    # functions, there is a logical phallacy that a contact could
+    # be part of the favourites list, but not the entries list,
+    # which I am going to ignore for the sake of simplicity.
     def save_new_contact(new_contact):
         """Save new contact."""
         entries.append(new_contact)
@@ -230,6 +271,8 @@ def add_new_contact():
         favourites.append(new_contact)
         print("New contact successfully added to favourites.")
 
+    # `QuestionsCatalogue` takes a list of any questions made from
+    # either an inquirer or an inquirer-executor class.
     answers_and_functions = QuestionsCatalogue(
         [
             Text("first_name", message="First name"),
@@ -244,9 +287,10 @@ def add_new_contact():
         ]
     ).prompt_all()
 
-    answers = answers_and_functions[0]
-    list_of_function = answers_and_functions[1]
+    # Unpacking the returned tuple into variables
+    answers, list_of_functions = answers_and_functions
 
+    # Creating a new instance for our new contact
     new_contact = Entry.create(
         answers["first_name"],
         answers["last_name"],
@@ -255,10 +299,14 @@ def add_new_contact():
         phone=answers["phone"],
     )
 
-    for function in list_of_function:
+    # Executing all the functions the user has checked.
+    for function in list_of_functions:
         function(new_contact)
 
 
+# This is one of the functions with a dynamically generated
+# docstring, which is why we can handily and aptly generate all
+# options with a list comprehension. Pretty neat.
 def delete_contacts():
     """Delete contacts."""
     InqExCheckbox(
@@ -272,10 +320,13 @@ def close():
     quit()
 
 
+# The main menu of the application is simply our five functions,
+# that will execute upon selection setting everything else in motion.
+# Easy as pie.
 def main_menu():
     InqExList(
         "What do you want to do?",
-        [list_all_constacts, list_favourites, add_new_contact, delete_contacts, close],
+        [list_all_contacts, list_favourites, add_new_contact, delete_contacts, close],
     ).prompt_and_execute()
 
 
