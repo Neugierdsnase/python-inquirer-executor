@@ -37,7 +37,7 @@
 
 import os
 import sys
-from inquirer import Text, List, prompt
+from inquirer import Text, prompt
 
 sys.path.append(os.path.realpath("."))
 from inquirer_executor import (
@@ -219,7 +219,44 @@ def list_favourites():
 
 def add_new_contact():
     """Add a new contact to the contact book."""
-    pass
+
+    def save_new_contact(new_contact):
+        """Save new contact."""
+        entries.append(new_contact)
+        print("New contact saved.")
+
+    def add_new_contact_to_favourites(new_contact):
+        """Add new contact to favourites."""
+        favourites.append(new_contact)
+        print("New contact successfully added to favourites.")
+
+    answers_and_functions = QuestionsCatalogue(
+        [
+            Text("first_name", message="First name"),
+            Text("last_name", message="Last name"),
+            Text("phone", message="phone number"),
+            Text("email", message="email address"),
+            Text("known_for", message="known for"),
+            InqExCheckbox(
+                "What do you want to do with this contact?",
+                [save_new_contact, add_new_contact_to_favourites],
+            ),
+        ]
+    ).prompt_all()
+
+    answers = answers_and_functions[0]
+    list_of_function = answers_and_functions[1]
+
+    new_contact = Entry.create(
+        answers["first_name"],
+        answers["last_name"],
+        answers["known_for"],
+        email=answers["email"],
+        phone=answers["phone"],
+    )
+
+    for function in list_of_function:
+        function(new_contact)
 
 
 def delete_contacts():
