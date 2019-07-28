@@ -74,14 +74,14 @@ data = [
         "last_name": "Lattner",
         "known_for": "Swift",
         "phone": "+35476588",
-        "email": "guido@dropbox.com",
+        "email": "chris@apple.com",
     },
     {
         "first_name": "Rasmus",
         "last_name": "Lerdorf",
         "known_for": "PHP",
         "phone": "+25436478",
-        "email": "guido@dropbox.com",
+        "email": "rasmus@lerdorf.ca",
     },
     {
         "first_name": "Ada",
@@ -98,6 +98,8 @@ data = [
 # Now that we have our data, let's define a class
 # representing the entries.
 
+favourites = []
+
 
 class Entry:
     def __init__(self, first_name, last_name, known_for, phone=None, email=None):
@@ -107,36 +109,82 @@ class Entry:
         self.phone = phone
         self.email = email
 
-        # It might seem strange to define this in the __init__ method
-        # and in fact you don't have to, but we need a place where the
-        # decorator is in scope to access the first_name and last_name
-        # OR self.first_name and self.last_name values.
-        # The __init__ method has one of these scopes.
-        @dynamic_docstring_decorator("{} {}".format(first_name, last_name))
+    @classmethod
+    def create(cls, first_name, last_name, known_for, *args, **kwargs):
+        return cls(first_name, last_name, known_for, *args, **kwargs).prepare()
+
+    def prepare(self):
+        @dynamic_docstring_decorator("{} {}".format(self.first_name, self.last_name))
         def show_options():
-            InqExList(
-                "What do you want to do with this contact?",
-                [self.add_to_favourites, self.change_number, self.change_email],
-            ).prompt_and_execute()
+            options = InqExList(
+                "What do you want to do with {} {}?".format(
+                    self.first_name, self.last_name
+                ),
+                [self.inspect, self.do_nothing, self.change_number, self.change_email],
+            )
+            if self in favourites:
+                options += self.remove_from_favourites
+            else:
+                options += self.add_to_favourites
+
+            options.prompt_and_execute()
 
         self.show_options = show_options
 
+        @dynamic_docstring_decorator(
+            "Delete {} {}".format(self.first_name, self.last_name)
+        )
+        def delete_entry():
+            global entries
+            entries = [entry for entry in entries if entry.last_name != self.last_name]
+            print("Deleted {} {}".format(self.first_name, self.last_name))
+
+        self.delete_entry = delete_entry
+
+        return self
+
+    def __repr__(self):
+        return "<Entry object for {} {}>".format(self.first_name, self.last_name)
+
+    def __str__(self):
+        """Show contact info."""
+        return "Name: {0} {1}\nphone: {2}\nemail: {3}\nknown for: {4}\n".format(
+            self.first_name, self.last_name, self.phone, self.email, self.known_for
+        )
+
+    def inspect(self):
+        """See this person's contact info."""
+        print(str(self))
+
     def add_to_favourites(self):
         """Add this contact to your favourite list."""
-        pass
+        favourites.append(self)
+
+    def remove_from_favourites(self):
+        """Remove this contact from your favourite list."""
+        global favourites
+        favourites = [entry for entry in favourites if entry != self]
 
     def change_number(self):
-        """Change the number for this contact."""
-        pass
+        """Change the phone number for this contact."""
+        self.phone = prompt(
+            [Text("new_number", message="Please enter the new phone number")]
+        )["new_number"]
 
     def change_email(self):
         """Change the email for this contact."""
+        self.email = prompt(
+            [Text("new_email", message="Please enter the new email adress")]
+        )["new_email"]
+
+    def do_nothing(self):
+        """Go back."""
         pass
 
 
 # Lets a list containing objects representing all our data
 entries = [
-    Entry(
+    Entry.create(
         entry["first_name"],
         entry["last_name"],
         entry["known_for"],
@@ -147,10 +195,38 @@ entries = [
 ]
 
 
+# The following four functions represent the main menu options
 def list_all_constacts():
     """List all the contacts"""
-    InqExList(
-        "Here are all your contacts:", [entry.show_options for entry in entries]
+    if not entries:
+        print("Your cantact book is empty.")
+    else:
+        InqExList(
+            "Here are all your contacts", [entry.show_options for entry in entries]
+        ).prompt_and_execute()
+
+
+def list_favourites():
+    """List favourite contacts"""
+    if not favourites:
+        print("Your favourites list is empty.")
+    else:
+        InqExList(
+            "Here are your favourite contacts",
+            [entry.show_options for entry in favourites],
+        ).prompt_and_execute()
+
+
+def add_new_contact():
+    """Add a new contact to the contact book."""
+    pass
+
+
+def delete_contacts():
+    """Delete contacts."""
+    InqExCheckbox(
+        "Which contacts do you want to delete?",
+        [entry.delete_entry for entry in entries],
     ).prompt_and_execute()
 
 
@@ -161,7 +237,8 @@ def close():
 
 def main_menu():
     InqExList(
-        "What do you want to do?", [list_all_constacts, close]
+        "What do you want to do?",
+        [list_all_constacts, list_favourites, add_new_contact, delete_contacts, close],
     ).prompt_and_execute()
 
 
@@ -169,4 +246,3 @@ if __name__ == "__main__":
     print("Welcome to your contact book.")
     while True:
         main_menu()
-
