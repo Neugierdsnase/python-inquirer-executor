@@ -157,9 +157,11 @@ For this reason InquirerExecutor provides a decorator named `dynamic_docstring_d
 ```python
 from inquirer_executor import dynamic_docstring_decorator
 
+name = input("What is your name?")
+
 @dynamic_docstring_decorator("Returns your name: {}".format(name))
 def some_function():
-    """Can't display the name variable here."""          # This docstring gets overwritten
+    """Can't display the name variable here.""" # This docstring gets overwritten
     return name
 ```
 
@@ -241,6 +243,9 @@ Assuming the user checked both options at the checkbox and chose "Return 4" at t
 [?] What's your last name: Wayne
 ({'first_name': 'Bruce', 'last_name': 'Wayne'}, [<function return_one at 0x7f516964de18>, <function return_two at 0x7f51663a4d90>, <function return_four at 0x7f516611bd08>])
 ```
+## Examples
+
+If you would like to see this package applied in a bit more complex examples, please do consult the [examples folder](./examples/) of this repository. These small projects are structured with human-readability in mind and are heavily commented to guide you through the code to get you working with this package in no time.
 
 ## Raison D'être
 
@@ -249,6 +254,8 @@ I needed this myself.
 ## Contributing
 
 Contributions and improvements are very welcome. Please write a test for your code contribution and use the [Black code formatter](https://pypi.org/project/black/) when editing the code in this project.
+
+If you have played around with the package and you think what you have created would make a good example project, I would absolutely love to merge it into the examples folder, please make sure to comment your code so others can understand what you are doing.
 
 ## License
 
