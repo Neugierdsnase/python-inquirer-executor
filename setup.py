@@ -28,6 +28,10 @@ setuptools.setup(
     license="MIT",
     include_package_data=True,
     zip_safe=False,
-    install_requires=["blessings == 1.7", "readchar == 2.0.1", "python-editor==1.0.4"],
+    install_requires=[
+        "blessings == 1.7",
+        "readchar == 2.0.1",
+        "python-editor == 1.0.4",
+    ],
     keywords="color terminal",
 )
