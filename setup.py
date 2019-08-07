@@ -22,7 +22,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Topic :: Software Development :: User Interfaces",
-        "Topic :: Software Development :: ",
         "Libraries :: Application Frameworks",
     ],
     license="MIT",
