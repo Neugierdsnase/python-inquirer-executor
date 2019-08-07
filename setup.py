@@ -23,7 +23,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: User Interfaces",
         "Topic :: Software Development",
-        "Libraries :: Application Frameworks",
+        "Topic :: Software Development :: Libraries :: Application Frameworks",
     ],
     license="MIT",
     include_package_data=True,
