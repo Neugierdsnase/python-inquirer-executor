@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Neugierdsnase/python-inquirer-executor",
-    packages=setuptools.find_packages(exclude=["tests", "examples"]),
+    packages=setuptools.find_packages(include=["inquirer_executor"]),
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
