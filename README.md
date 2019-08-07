@@ -131,7 +131,7 @@ InquirerExecutor provides a `remove(value)` method, that excepts **either** a **
 
 ### Passing arguments
 
-You can of course pass whatever arguments you like to your functions. Just keep in mind, that potentially any and every function will be called, so all of your functions *must* accept the **same** arguments and keywords. To prevent possible errors down the road, InquirerExecuter **enforces this** at creation time and will throw an `AssertionError` if the arguments and keyword arguments of your functions don't match.
+You can of course pass whatever arguments you like to your functions. Just keep in mind, that potentially any and every function in the list will be called, so all of your functions *must* accept the **same** parameters. To prevent possible errors down the road, InquirerExecuter **enforces this** at creation time and will throw an `AssertionError` if the accepted parameters of your functions don't match.
 
 ### Theming
 
