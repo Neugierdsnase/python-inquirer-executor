@@ -1,4 +1,4 @@
-from inquirer_executor import (
+from .inquirer_executor import (
     InquirerExecutorList,
     InquirerExecutorCheckbox,
     QuestionsCatalogue,
