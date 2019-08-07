@@ -1,4 +1,5 @@
 from .inquirer_executor import (
+    # InquirerExecutorBase,
     InquirerExecutorList,
     InquirerExecutorCheckbox,
     QuestionsCatalogue,
@@ -15,4 +16,4 @@ from .inquirer_executor import (
 # email: mail@vomkonstant.in
 # released under the MIT License
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
