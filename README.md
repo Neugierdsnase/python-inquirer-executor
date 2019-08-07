@@ -8,7 +8,11 @@ This package extends this thought by building classes on top of it to create pro
 ## How to use
 ### Installation
 
-As of right now, the only way to use this is to download it from this GitHub repository. You can also manually copy paste this into your project since the whole code is contained in a single file.
+```
+pip install inquirer-executor
+```
+
+As the whole code is contained in a single file and has only one dependecy (the built-upon [inquirer](https://github.com/magmax/python-inquirer) package), you can also manually copy/paste this (or parts of it) into your project, if that is how you roll.
 
 ### Creating a single-choice question (List)
 ```python
@@ -245,7 +249,7 @@ Assuming the user checked both options at the checkbox and chose "Return 4" at t
 ```
 ## Examples
 
-If you would like to see this package applied in a bit more complex examples, please do consult the [examples folder](./examples/) of this repository. These small projects are structured with human-readability in mind and are heavily commented to guide you through the code to get you working with this package in no time.
+If you would like to see this package applied in a bit more complex examples, please do consult the [examples folder](https://github.com/Neugierdsnase/python-inquirer-executor/tree/master/examples) of the repository. These small projects are structured with human-readability in mind and are heavily commented to guide you through the code to get you working with this package in no time.
 
 ## Raison D'être
 
@@ -261,4 +265,4 @@ If you have played around with the package and you think what you have created w
 
 Copyright (c) 2019 [Konstantin Kovar](https://blog.vomkonstant.in), based on [python-inquirer](https://github.com/magmax/python-inquirer), by Miguel Ángel García ([@magmax9](https://twitter.com/magmax9)).
 
-Licensed under the [MIT license](./LICENSE).
+Licensed under the [MIT license](https://github.com/Neugierdsnase/python-inquirer-executor/blob/master/LICENSE).
