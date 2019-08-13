@@ -1,0 +1,1 @@
+pytest tests/test_inquirer_executor.py --verbose
