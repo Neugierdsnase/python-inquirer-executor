@@ -124,9 +124,11 @@ class InquirerExecutorBase:
                 if option.__name__ != function_name_or_index
             ]
             self._update_question()
+            return self
         elif isinstance(function_name_or_index, int):
             del self._options[function_name_or_index]
             self._update_question()
+            return self
         else:
             raise ValueError("You can only remove functions by index or function name.")
 
