@@ -1,5 +1,5 @@
 from .inquirer_executor import (
-    # InquirerExecutorBase,
+    InquirerExecutorBase,
     InquirerExecutorList,
     InquirerExecutorCheckbox,
     QuestionsCatalogue,
